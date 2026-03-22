@@ -318,6 +318,7 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 			ContextWindow:          contextWindow,
 			MaxTokens:              ag.ParseMaxTokens(),
 			MaxIterations:          maxIter,
+			OptimizePrompt:         ag.ParseOptimizePrompt(),
 			Workspace:              workspace,
 			DataDir:                deps.DataDir,
 			RestrictToWs:           &restrictVal,

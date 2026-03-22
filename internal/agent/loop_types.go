@@ -47,6 +47,7 @@ type Loop struct {
 	maxTokens     int // max output tokens per LLM call (0 = default 8192)
 	maxIterations int
 	maxToolCalls  int
+	optimizePrompt bool
 	workspace        string
 	dataDir          string // global workspace root for team workspace resolution
 	workspaceSharing *store.WorkspaceSharingConfig
@@ -171,6 +172,7 @@ type LoopConfig struct {
 	MaxTokens       int // max output tokens per LLM call (0 = default 8192)
 	MaxIterations   int
 	MaxToolCalls    int
+	OptimizePrompt  bool
 	Workspace        string
 	DataDir          string // global workspace root for team workspace resolution
 	WorkspaceSharing *store.WorkspaceSharingConfig
@@ -305,6 +307,7 @@ func NewLoop(cfg LoopConfig) *Loop {
 		maxTokens:              cfg.MaxTokens,
 		maxIterations:          cfg.MaxIterations,
 		maxToolCalls:           cfg.MaxToolCalls,
+		optimizePrompt:         cfg.OptimizePrompt,
 		workspace:              cfg.Workspace,
 		dataDir:                cfg.DataDir,
 		workspaceSharing:       cfg.WorkspaceSharing,

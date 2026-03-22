@@ -184,6 +184,20 @@ func (a *AgentData) ParseMaxTokens() int {
 	return cfg.MaxTokens
 }
 
+// ParseOptimizePrompt extracts optimize_prompt from other_config JSONB.
+func (a *AgentData) ParseOptimizePrompt() bool {
+	if len(a.OtherConfig) == 0 {
+		return false
+	}
+	var cfg struct {
+		OptimizePrompt bool `json:"optimize_prompt"`
+	}
+	if err := json.Unmarshal(a.OtherConfig, &cfg); err != nil {
+		return false
+	}
+	return cfg.OptimizePrompt
+}
+
 // ParseSelfEvolve extracts self_evolve from other_config JSONB.
 // When true, predefined agents can update their SOUL.md (style/tone) through chat.
 func (a *AgentData) ParseSelfEvolve() bool {
