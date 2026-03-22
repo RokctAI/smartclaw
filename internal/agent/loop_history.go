@@ -200,6 +200,7 @@ func (l *Loop) buildMessages(ctx context.Context, history []providers.Message, s
 		SelfEvolve:             l.selfEvolve,
 		CredentialCLIContext:   l.buildCredentialCLIContext(ctx),
 		IsBootstrap:            hadBootstrap && l.agentType != store.AgentTypePredefined,
+		OptimizePrompt:         l.optimizePrompt,
 	})
 
 	messages = append(messages, providers.Message{

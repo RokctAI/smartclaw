@@ -66,6 +66,9 @@ type SystemPromptConfig struct {
 	// Bootstrap mode: BOOTSTRAP.md is present — slim prompt with only write_file tool.
 	// Skips skills, MCP, team workspace, spawn, sandbox, self-evolve, recency reminders.
 	IsBootstrap bool
+
+	// Enable System Prompt Optimizer
+	OptimizePrompt bool
 }
 
 // coreToolSummaries maps tool names to one-line descriptions.
@@ -294,16 +297,47 @@ func BuildSystemPrompt(cfg SystemPromptConfig) string {
 	}
 
 	result := strings.Join(lines, "\n")
+
+	if cfg.OptimizePrompt {
+		result = minifySystemPrompt(result)
+	}
+
 	slog.Info("system prompt built",
 		"mode", string(cfg.Mode),
 		"contextFiles", len(cfg.ContextFiles),
 		"hasMemory", cfg.HasMemory,
 		"hasSpawn", cfg.HasSpawn,
 		"isBootstrap", cfg.IsBootstrap,
+		"optimizePrompt", cfg.OptimizePrompt,
 		"promptLen", len(result),
 	)
 
 	return result
+}
+
+// minifySystemPrompt removes redundant whitespace and newlines to save tokens.
+func minifySystemPrompt(prompt string) string {
+	lines := strings.Split(prompt, "\n")
+	var optimized []string
+	consecutiveBlankLines := 0
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		if trimmed == "" {
+			consecutiveBlankLines++
+			// Keep at most one consecutive blank line (paragraph separator)
+			if consecutiveBlankLines > 1 {
+				continue
+			}
+		} else {
+			consecutiveBlankLines = 0
+		}
+
+		optimized = append(optimized, trimmed)
+	}
+
+	return strings.TrimSpace(strings.Join(optimized, "\n"))
 }
 
 // --- Section builders ---
