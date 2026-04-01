@@ -180,6 +180,10 @@ type Loop struct {
 
 	// Memory store for extractive memory fallback (writes directly when LLM flush fails)
 	memStore store.MemoryStore
+
+	// SuppressThinking: when true, thinking events are not emitted to the channel.
+	// Used for expensive channels (WhatsApp) to save on API costs.
+	suppressThinking bool
 }
 
 // AgentEvent is emitted during agent execution for WS broadcasting.
@@ -316,6 +320,9 @@ type LoopConfig struct {
 	MCPStore        store.MCPServerStore  // for credential lookup
 	MCPPool         *mcpbridge.Pool       // user-keyed connection pool
 	MCPUserCredSrvs []store.MCPAccessInfo // servers needing per-user creds
+
+	// SuppressThinking: skip emitting thinking chunks to the channel
+	SuppressThinking bool
 }
 
 const defaultMaxTokens = config.DefaultMaxTokens
@@ -413,6 +420,7 @@ func NewLoop(cfg LoopConfig) *Loop {
 		mcpStore:               cfg.MCPStore,
 		mcpPool:                cfg.MCPPool,
 		mcpUserCredSrvs:        cfg.MCPUserCredSrvs,
+		suppressThinking:       cfg.SuppressThinking,
 	}
 }
 

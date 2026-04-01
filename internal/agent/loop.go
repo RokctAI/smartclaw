@@ -295,12 +295,14 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (result *RunResult, 
 		if req.Stream {
 			resp, err = provider.ChatStream(callCtx, chatReq, func(chunk providers.StreamChunk) {
 				if chunk.Thinking != "" {
-					emitRun(AgentEvent{
-						Type:    protocol.ChatEventThinking,
-						AgentID: l.id,
-						RunID:   req.RunID,
-						Payload: map[string]string{"content": chunk.Thinking},
-					})
+					if !l.suppressThinking {
+						emitRun(AgentEvent{
+							Type:    protocol.ChatEventThinking,
+							AgentID: l.id,
+							RunID:   req.RunID,
+							Payload: map[string]string{"content": chunk.Thinking},
+						})
+					}
 				}
 				if chunk.Content != "" {
 					emitRun(AgentEvent{
@@ -324,7 +326,7 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (result *RunResult, 
 
 		// For non-streaming responses, emit thinking and content as single events
 		if !req.Stream {
-			if resp.Thinking != "" {
+			if resp.Thinking != "" && !l.suppressThinking {
 				emitRun(AgentEvent{
 					Type:    protocol.ChatEventThinking,
 					AgentID: l.id,
