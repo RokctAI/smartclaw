@@ -212,7 +212,7 @@ func (t *ReadFileTool) getFsBridge(ctx context.Context, sandboxKey string) (*san
 }
 
 // readFileMaxChars is the output cap for read_file. Large files require offset/limit pagination.
-const readFileMaxChars = 50000
+const readFileMaxChars = 8000
 
 // paginateOutput applies offset/limit slicing and output capping to file content.
 // Returns a SilentResult with pagination metadata when the output is truncated.
