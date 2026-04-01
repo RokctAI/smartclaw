@@ -101,6 +101,9 @@ type ResolverDeps struct {
 
 	// Global workspace root (GOCLAW_WORKSPACE)
 	Workspace string
+
+	// ROKCT role: "control" or "tenant"
+	AppRole string
 }
 
 // NewManagedResolver creates a ResolverFunc that builds Loops from DB agent data.
@@ -116,8 +119,14 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 		} else {
 			ag, err = deps.AgentStore.GetByKey(ctx, agentKey)
 		}
+		}
 		if err != nil {
 			return nil, fmt.Errorf("agent not found: %s", agentKey)
+		}
+
+		// Inject role from boot env if not explicitly overridden in DB
+		if ag.AppRole == "" {
+			ag.AppRole = deps.AppRole
 		}
 
 		if ag.Status != store.AgentStatusActive {
@@ -191,12 +200,16 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 
 		// Inject negative context so the model doesn't waste iterations probing
 		// unavailable capabilities (team_tasks, etc.).
-		if !hasTeam {
-			contextFiles = append(contextFiles, bootstrap.ContextFile{
-				Path:    bootstrap.AvailabilityFile,
-				Content: "You are NOT part of any team. Do not use team_tasks tool.",
-			})
 		}
+		// Inject ROKCT_ROLE.md to let the agent know its environment and limitations
+		rolePrompt := "You are running in ROKCT RESTRICTED mode (Tenant). You cannot perform coding tasks or modify system files."
+		if ag.AppRole == "control" {
+			rolePrompt = "You are running in ROKCT SOVEREIGN mode (Control). You have full coding and system administration capabilities."
+		}
+		contextFiles = append(contextFiles, bootstrap.ContextFile{
+			Path:    bootstrap.RokctRoleFile,
+			Content: rolePrompt,
+		})
 
 		contextWindow := ag.ContextWindow
 		if contextWindow <= 0 {
@@ -416,6 +429,7 @@ func NewManagedResolver(deps ResolverDeps) ResolverFunc {
 			MCPStore:               deps.MCPStore,
 			MCPPool:                deps.MCPPool,
 			MCPUserCredSrvs:        mcpUserCredSrvs,
+			AppRole:                ag.AppRole,
 		})
 
 		slog.Info("resolved agent from DB", "agent", agentKey, "model", ag.Model, "provider", ag.Provider)

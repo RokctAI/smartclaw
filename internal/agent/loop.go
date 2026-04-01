@@ -582,7 +582,13 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (result *RunResult, 
 				}
 			}
 			if result == nil {
-				result = l.tools.ExecuteWithContext(iterCtx, registryName, tc.Arguments, req.Channel, req.ChatID, req.PeerKind, req.SessionKey, nil)
+				// Final safety check: block coding tools for tenant-role agents
+				if l.appRole == "tenant" && tools.IsCodingTool(registryName) {
+					slog.Warn("security.role_blocked_execution", "agent", l.id, "tool", tc.Name, "role", l.appRole)
+					result = tools.ErrorResult("Action blocked: this agent is in restricted mode and cannot modify files.")
+				} else {
+					result = l.tools.ExecuteWithContext(iterCtx, registryName, tc.Arguments, req.Channel, req.ChatID, req.PeerKind, req.SessionKey, nil)
+				}
 			}
 			stopSlowTimer()
 
@@ -666,7 +672,13 @@ func (l *Loop) runLoop(ctx context.Context, req RunRequest) (result *RunResult, 
 						}
 					}
 					if result == nil {
-						result = l.tools.ExecuteWithContext(iterCtx, registryName, tc.Arguments, req.Channel, req.ChatID, req.PeerKind, req.SessionKey, nil)
+						// Final safety check: block coding tools for tenant-role agents (parallel path)
+						if l.appRole == "tenant" && tools.IsCodingTool(registryName) {
+							slog.Warn("security.role_blocked_execution", "agent", l.id, "tool", tc.Name, "role", l.appRole)
+							result = tools.ErrorResult("Action blocked: this agent is in restricted mode and cannot modify files.")
+						} else {
+							result = l.tools.ExecuteWithContext(iterCtx, registryName, tc.Arguments, req.Channel, req.ChatID, req.PeerKind, req.SessionKey, nil)
+						}
 					}
 					stopSlowTimer()
 					l.emitToolSpanEnd(ctx, spanID, spanStart, result)

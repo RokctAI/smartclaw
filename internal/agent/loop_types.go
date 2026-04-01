@@ -184,6 +184,10 @@ type Loop struct {
 	// SuppressThinking: when true, thinking events are not emitted to the channel.
 	// Used for expensive channels (WhatsApp) to save on API costs.
 	suppressThinking bool
+
+	// AppRole: "control" or "tenant" from Frappe site_config.
+	// Controls tool availability (coding tools locked for tenants).
+	appRole string
 }
 
 // AgentEvent is emitted during agent execution for WS broadcasting.
@@ -323,6 +327,9 @@ type LoopConfig struct {
 
 	// SuppressThinking: skip emitting thinking chunks to the channel
 	SuppressThinking bool
+
+	// AppRole: "control" or "tenant"
+	AppRole string
 }
 
 const defaultMaxTokens = config.DefaultMaxTokens
@@ -421,6 +428,7 @@ func NewLoop(cfg LoopConfig) *Loop {
 		mcpPool:                cfg.MCPPool,
 		mcpUserCredSrvs:        cfg.MCPUserCredSrvs,
 		suppressThinking:       cfg.SuppressThinking,
+		appRole:                cfg.AppRole,
 	}
 }
 

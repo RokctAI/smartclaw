@@ -128,3 +128,15 @@ func ToProviderDef(t Tool) providers.ToolDefinition {
 		},
 	}
 }
+
+// IsCodingTool returns true if the tool name belongs to the coding/file-writing category.
+// These tools reflect the "Sovereign Coding Engine" capabilities and are restricted
+// when AppRole is set to "tenant".
+func IsCodingTool(name string) bool {
+	switch name {
+	case "edit", "edit_structural", "filesystem_write", "shell", "credentialed_exec", 
+		"publish_skill", "git_clone", "subagent_spawn", "mcpserve":
+		return true
+	}
+	return false
+}

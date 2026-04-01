@@ -34,6 +34,7 @@ const (
 	MemoryFile     = "MEMORY.md"
 	MemoryAltFile  = "memory.md"
 	MemoryJSONFile = "MEMORY.json"
+	RokctRoleFile  = "ROKCT_ROLE.md"
 )
 
 // standardFiles is the ordered list of bootstrap files to load.
@@ -49,8 +50,9 @@ var standardFiles = []string{
 // minimalAllowlist is the set of files loaded for subagent/cron sessions.
 // Matching TS MINIMAL_BOOTSTRAP_ALLOWLIST.
 var minimalAllowlist = map[string]bool{
-	AgentsFile: true,
-	ToolsFile:  true,
+	AgentsFile:    true,
+	ToolsFile:     true,
+	RokctRoleFile: true,
 }
 
 // File represents a workspace bootstrap file loaded from disk.

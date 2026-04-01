@@ -40,6 +40,7 @@ import (
 	"github.com/nextlevelbuilder/goclaw/internal/store/pg"
 	"github.com/nextlevelbuilder/goclaw/internal/tasks"
 	"github.com/nextlevelbuilder/goclaw/internal/tools"
+	"github.com/nextlevelbuilder/goclaw/internal/frappe"
 	"github.com/nextlevelbuilder/goclaw/pkg/protocol"
 )
 
@@ -107,6 +108,15 @@ func runGateway() {
 		workspace, _ = filepath.Abs(workspace)
 	}
 	os.MkdirAll(workspace, 0755)
+
+	// Detect Frappe site configuration (for app_role + db credentials)
+	appRole := "tenant" // default to safe mode
+	if siteConfig, err := frappe.IngestSiteConfig(); err == nil {
+		slog.Info("frappe.site_config_ingested", "role", siteConfig.AppRole, "db", siteConfig.DBName)
+		appRole = siteConfig.AppRole
+	} else {
+		slog.Warn("frappe.site_config_not_found", "error", err, "using_default_role", appRole)
+	}
 
 	// Bootstrap files live in Postgres.
 
@@ -346,7 +356,7 @@ func runGateway() {
 	var mcpPool *mcpbridge.Pool
 	var mediaStore *media.Store
 	var postTurn tools.PostTurnProcessor
-	contextFileInterceptor, mcpPool, mediaStore, postTurn = wireExtras(pgStores, agentRouter, providerRegistry, msgBus, pgStores.Sessions, toolsReg, toolPE, skillsLoader, hasMemory, traceCollector, workspace, cfg.Gateway.InjectionAction, cfg, sandboxMgr, redisClient)
+	contextFileInterceptor, mcpPool, mediaStore, postTurn = wireExtras(pgStores, agentRouter, providerRegistry, msgBus, pgStores.Sessions, toolsReg, toolPE, skillsLoader, hasMemory, traceCollector, workspace, cfg.Gateway.InjectionAction, cfg, sandboxMgr, redisClient, appRole)
 	if mcpPool != nil {
 		defer mcpPool.Stop()
 	}
