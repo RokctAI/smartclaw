@@ -16,8 +16,18 @@ import (
 // Run processes a single message through the agent loop.
 // It blocks until completion and returns the final response.
 func (l *Loop) Run(ctx context.Context, req RunRequest) (*RunResult, error) {
-	l.activeRuns.Add(1)
 	defer l.activeRuns.Add(-1)
+	
+	// Automatic Thinking Suppression:
+	// If the run originates from WhatsApp, we suppress reasoning/thinking
+	// emissions to the channel to save on expensive API costs.
+	// We reset it on every run because the same Loop instance
+	// can be reused for different channel requests in the router.
+	if req.ChannelType == "whatsapp" {
+		l.suppressThinking = true
+	} else {
+		l.suppressThinking = false
+	}
 
 	// Per-run emit wrapper: enriches every AgentEvent with delegation + routing context.
 	emitRun := func(event AgentEvent) {
