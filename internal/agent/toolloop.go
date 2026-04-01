@@ -59,10 +59,11 @@ var teamTasksNeutralActions = map[string]bool{
 // toolLoopState tracks recent tool calls within a single agent run
 // to detect infinite loops (same tool + same args + same result).
 type toolLoopState struct {
-	history        []toolCallRecord
-	readOnlyStreak int             // consecutive non-mutating, non-exec tool calls
-	readOnlyUnique int             // unique args hashes in current streak
-	seenReadArgs   map[string]bool // tracks unique read arg hashes for uniqueness ratio
+	history           []toolCallRecord
+	readOnlyStreak    int             // consecutive non-mutating, non-exec tool calls
+	readOnlyUnique    int             // unique args hashes in current streak
+	seenReadArgs      map[string]bool // tracks unique read arg hashes for uniqueness ratio
+	consecutiveErrors int             // consecutive tool errors leading to an SOP failure
 }
 
 type toolCallRecord struct {
@@ -181,6 +182,25 @@ func (s *toolLoopState) resetStreak() {
 	s.readOnlyStreak = 0
 	s.readOnlyUnique = 0
 	s.seenReadArgs = nil
+}
+
+// recordError tracks consecutive tool failures to detect LLM hallucination loops.
+func (s *toolLoopState) recordError(isError bool) {
+	if isError {
+		s.consecutiveErrors++
+	} else {
+		s.consecutiveErrors = 0
+	}
+}
+
+// detectErrors checks if the agent has hit consecutive tool failures and needs SOP correction.
+func (s *toolLoopState) detectErrors() (level, message string) {
+	if s.consecutiveErrors >= 3 {
+		return "critical", "CRITICAL ERROR THRESHOLD REACHED: You have hallucinated or failed 3 consecutive tool calls. " +
+			"Stop attempting the same faulty actions. You MUST read the .rokct/workflows/self_correction_sop.md protocol immediately " +
+			"to realign your assumptions before continuing."
+	}
+	return "", ""
 }
 
 // incrementReadOnly increments the read-only streak and tracks uniqueness.
