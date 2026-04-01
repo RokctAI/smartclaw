@@ -87,6 +87,9 @@ type SystemPromptConfig struct {
 	// Bootstrap mode: BOOTSTRAP.md is present — slim prompt with only write_file tool.
 	// Skips skills, MCP, team workspace, spawn, sandbox, self-evolve, recency reminders.
 	IsBootstrap bool
+
+	// ProtocolRules contains the formatted ROKCT guidelines loaded from the local workspace.
+	ProtocolRules string
 }
 
 // coreToolSummaries maps tool names to one-line descriptions.
@@ -217,6 +220,11 @@ func BuildSystemPrompt(cfg SystemPromptConfig) string {
 	personaFiles, otherFiles := splitPersonaFiles(cfg.ContextFiles)
 	if len(personaFiles) > 0 {
 		lines = append(lines, buildPersonaSection(personaFiles, cfg.AgentType)...)
+	}
+
+	// 1.8. GLOBAL WORKSPACE PROTOCOL (ROKCT)
+	if cfg.ProtocolRules != "" {
+		lines = append(lines, cfg.ProtocolRules)
 	}
 
 	// 2. ## Tooling
