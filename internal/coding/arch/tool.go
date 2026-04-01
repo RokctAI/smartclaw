@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/nextlevelbuilder/goclaw/internal/tools"
 )
@@ -49,7 +50,7 @@ func (t *ArchTool) Execute(ctx context.Context, args map[string]any) *tools.Resu
 
 	// Resolve the real workspace path from context if possible
 	ws := t.workspace
-	if ctxWs := tools.ToolWorkspace(ctx); ctxWs != "" {
+	if ctxWs := tools.ToolWorkspaceFromCtx(ctx); ctxWs != "" {
 		ws = ctxWs
 	}
 
