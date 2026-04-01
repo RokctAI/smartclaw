@@ -30,7 +30,7 @@ func cutAtFirstNewline(text string) string {
 
 // execMaxOutputChars is the maximum characters kept from exec/shell output.
 // Larger outputs are truncated with head+tail strategy.
-const execMaxOutputChars = 30000
+const execMaxOutputChars = 8000
 
 // execImportantTailRe matches keywords indicating the tail contains important info.
 var execImportantTailRe = regexp.MustCompile(`(?i)(error|exception|failed|fatal|traceback|panic|stack trace|exit code|total|summary|result|complete|finished|done|}\s*$)`)
