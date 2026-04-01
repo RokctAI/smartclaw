@@ -337,7 +337,15 @@ func BuildSystemPrompt(cfg SystemPromptConfig) string {
 			lines = append(lines, buildPersonaReminder(personaFiles, cfg.AgentType, cfg.ProviderType)...)
 		}
 		if !isMinimal {
-			lines = append(lines, "Reminder: Follow AGENTS.md rules — NO_REPLY when silent, match the user's language.", "")
+			lines = append(lines, "Reminder: Follow AGENTS.md rules — memory recall before answering, NO_REPLY when silent, match the user's language.", "")
+			lines = append(lines, "CRITICAL TOKEN RULE (TALK LESS, CODE MORE): You are a high-speed execution engine, not a conversational chatbot. DO NOT output long explanations, apologies, or essays. Only output the exact JSON tool calls and the absolute minimum conversational text required to notify the user. Conserve your tokens.", "")
+		}
+		if !isMinimal && cfg.HasMemory {
+			memReminder := "Reminder: Before answering questions about prior work, decisions, or preferences, always run memory_search first."
+			if cfg.HasKnowledgeGraph {
+				memReminder += " Also run knowledge_graph_search when the question involves people, teams, projects, or connections — it finds relationship paths that memory_search misses."
+			}
+			lines = append(lines, memReminder, "")
 		}
 	}
 
