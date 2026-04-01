@@ -12,6 +12,7 @@ import (
 
 	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
 	"github.com/nextlevelbuilder/goclaw/internal/bus"
+	"github.com/nextlevelbuilder/goclaw/internal/coding/arch"
 	"github.com/nextlevelbuilder/goclaw/internal/config"
 	mcpbridge "github.com/nextlevelbuilder/goclaw/internal/mcp"
 	"github.com/nextlevelbuilder/goclaw/internal/permissions"
@@ -80,6 +81,7 @@ func setupToolRegistry(
 		toolsReg.Register(tools.NewListFilesTool(workspace, agentCfg.RestrictToWorkspace))
 		toolsReg.Register(tools.NewEditTool(workspace, agentCfg.RestrictToWorkspace))
 		toolsReg.Register(tools.NewExecTool(workspace, agentCfg.RestrictToWorkspace))
+		toolsReg.Register(arch.NewArchTool(workspace, agentCfg.RestrictToWorkspace))
 	}
 
 	// Memory tools — PG-backed; always registered (PG memory is always available)

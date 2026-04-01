@@ -19,6 +19,7 @@ func builtinToolSeedData() []store.BuiltinToolDef {
 		{Name: "write_file", DisplayName: "Write File", Description: "Write content to a file in the workspace, creating directories as needed", Category: "filesystem", Enabled: true},
 		{Name: "list_files", DisplayName: "List Files", Description: "List files and directories in a given path within the workspace", Category: "filesystem", Enabled: true},
 		{Name: "edit", DisplayName: "Edit File", Description: "Apply targeted search-and-replace edits to existing files without rewriting the entire file", Category: "filesystem", Enabled: true},
+		{Name: "analyze_architecture", DisplayName: "Analyze Architecture", Description: "Scan the workspace to map project roots, configuration files, and entry points automatically", Category: "filesystem", Enabled: true},
 
 		// runtime
 		{Name: "exec", DisplayName: "Execute Command", Description: "Execute a shell command in the workspace and return stdout/stderr", Category: "runtime", Enabled: true,
