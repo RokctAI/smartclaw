@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nextlevelbuilder/goclaw/internal/bootstrap"
+	"github.com/nextlevelbuilder/goclaw/internal/coding/rules"
 	"github.com/nextlevelbuilder/goclaw/internal/config"
 	"github.com/nextlevelbuilder/goclaw/internal/edition"
 	"github.com/nextlevelbuilder/goclaw/internal/providers"
@@ -236,6 +237,12 @@ func (l *Loop) buildMessages(ctx context.Context, history []providers.Message, s
 		}
 	}
 
+	// Load Global Protocol from local workspace
+	var protocolRules string
+	if rs, err := rules.LoadProtocol(promptWorkspace); err == nil {
+		protocolRules = rs.Format()
+	}
+
 	systemPrompt := BuildSystemPrompt(SystemPromptConfig{
 		AgentID:                l.id,
 		Model:                  l.model,
@@ -270,6 +277,7 @@ func (l *Loop) buildMessages(ctx context.Context, history []providers.Message, s
 		ProviderType:           providerTypeOf(l.provider),
 		CredentialCLIContext:   l.buildCredentialCLIContext(ctx),
 		IsBootstrap:            hadBootstrap && l.agentType != store.AgentTypePredefined,
+		ProtocolRules:          protocolRules,
 	})
 
 	messages = append(messages, providers.Message{
