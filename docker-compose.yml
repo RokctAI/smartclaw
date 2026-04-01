@@ -49,6 +49,7 @@ services:
       - GOCLAW_SKILLS_DIR=/app/data/skills
       # Debug
       - GOCLAW_TRACE_VERBOSE=${GOCLAW_TRACE_VERBOSE:-0}
+      - GOCLAW_WHATSAPP_BRIDGE_URL=ws://whatsapp-bridge:3000
     volumes:
       - goclaw-data:/app/data
       - goclaw-workspace:/app/workspace
@@ -75,10 +76,26 @@ services:
       - default
       - goclaw-net
     restart: unless-stopped
+    depends_on:
+      - whatsapp-bridge
+
+  whatsapp-bridge:
+    build:
+      context: ./services/whatsapp-bridge
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    volumes:
+      - whatsapp-auth:/app/auth_info
+    networks:
+      - goclaw-net
+    restart: unless-stopped
 
 volumes:
   goclaw-data:
   goclaw-workspace:
+  whatsapp-auth:
 
 networks:
   goclaw-net:
