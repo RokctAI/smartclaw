@@ -18,25 +18,25 @@ const (
 	ProjectUnknown   ProjectType = "unknown"
 )
 
-// ProjectNode represents a node in the architecture tree.
-type ProjectNode struct {
-	Path        string        `json:"path"`
-	Name        string        `json:"name"`
-	Type        ProjectType   `json:"type,omitempty"`
-	IsRoot      bool          `json:"is_root,omitempty"`
-	Children    []*ProjectNode `json:"children,omitempty"`
-	EntryPoints []string      `json:"entry_points,omitempty"`
-	Configs     []string      `json:"configs,omitempty"`
+// ProjectArchNode represents a node in the architecture tree.
+type ProjectArchNode struct {
+	Path        string             `json:"path"`
+	Name        string             `json:"name"`
+	Type        ProjectType        `json:"type,omitempty"`
+	IsRoot      bool               `json:"is_root,omitempty"`
+	Children    []*ProjectArchNode `json:"children,omitempty"`
+	EntryPoints []string           `json:"entry_points,omitempty"`
+	Configs     []string           `json:"configs,omitempty"`
 }
 
 // MapWorkspace scans the given path and identifies all project roots.
-func MapWorkspace(rootPath string) (*ProjectNode, error) {
+func MapWorkspace(rootPath string) (*ProjectArchNode, error) {
 	absRoot, err := filepath.Abs(rootPath)
 	if err != nil {
 		return nil, err
 	}
 
-	root := &ProjectNode{
+	root := &ProjectArchNode{
 		Path: absRoot,
 		Name: filepath.Base(absRoot),
 	}
@@ -69,7 +69,7 @@ func MapWorkspace(rootPath string) (*ProjectNode, error) {
 	// Map each found root to its properties
 	for _, rp := range roots {
 		rel, _ := filepath.Rel(absRoot, rp)
-		node := &ProjectNode{
+		node := &ProjectArchNode{
 			Path:   rel,
 			Name:   filepath.Base(rp),
 			Type:   detectProjectType(rp),
